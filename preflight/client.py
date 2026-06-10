@@ -22,6 +22,8 @@ from dataclasses import dataclass
 
 import requests
 
+from .heuristics import user_text
+
 ALLOWED_KEYS = {"model", "messages", "system", "tools", "max_tokens"}
 ALLOWED_ROLES = {"user", "assistant"}
 RETRYABLE_STATUS = {502, 503}
@@ -49,7 +51,20 @@ class RouteDecision:
 
 
 def validate_payload(body: dict) -> None:
-    """Reject bodies the server would silently accept but score on empty text."""
+    """Reject bodies the server would 200 on but score on the wrong text.
+
+    Raises PayloadError on:
+      * unknown top-level keys (the "mesages" typo class),
+      * missing or empty 'model', missing or empty 'messages',
+      * a message that is not an object, has a role outside
+        {user, assistant}, or whose content is not a str/list,
+      * mistyped 'system' / 'tools' / 'max_tokens',
+      * empty user-role text: the concatenation of all user-role text
+        (string content plus "text" blocks, via user_text(), the same
+        text the router embeds) is empty or whitespace-only. This
+        rejects content "", content [], and image-only block lists,
+        which the server would otherwise score as an empty prompt.
+    """
     if not isinstance(body, dict):
         raise PayloadError(f"body must be a dict, got {type(body).__name__}")
     unknown = set(body) - ALLOWED_KEYS
@@ -69,6 +84,10 @@ def validate_payload(body: dict) -> None:
         content = msg.get("content")
         if not isinstance(content, (str, list)):
             raise PayloadError(f"messages[{i}].content must be a string or a block list")
+    if not user_text(body).strip():
+        raise PayloadError(
+            "messages contain no user-role text (content '', [], or image-only "
+            "blocks); the router would score an empty prompt")
     if "system" in body and not isinstance(body["system"], (str, list)):
         raise PayloadError("'system' must be a string or a block list")
     if "tools" in body and not isinstance(body["tools"], list):

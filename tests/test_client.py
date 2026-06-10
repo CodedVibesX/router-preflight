@@ -1,6 +1,6 @@
-"""Client behavior: payload self-validation, contract parsing, retries.
-The HTTP layer is stubbed; the validation/parse/retry logic under test
-is the real code."""
+"""Client behavior: payload self-validation (including the empty-user-text
+rejection), contract parsing, retries. The HTTP layer is stubbed; the
+validation/parse/retry logic under test is the real code."""
 import json
 
 import pytest
@@ -59,6 +59,32 @@ def test_valid_payload_passes():
                       "system": "s", "tools": [], "max_tokens": 10})
 
 
+# The server scores only user-role text; a body with none of it gets a
+# confident decision about an empty prompt. All three shapes must be
+# rejected client-side, before any HTTP call is made (calls stay at 0).
+
+def test_empty_string_user_content_rejected_before_http(monkeypatch):
+    client, calls = make_client(monkeypatch, [FakeResponse(200, GOOD)])
+    with pytest.raises(PayloadError, match="no user-role text"):
+        client.route({"model": "m", "messages": [{"role": "user", "content": ""}]})
+    assert calls["n"] == 0
+
+
+def test_empty_block_list_user_content_rejected_before_http(monkeypatch):
+    client, calls = make_client(monkeypatch, [FakeResponse(200, GOOD)])
+    with pytest.raises(PayloadError, match="no user-role text"):
+        client.route({"model": "m", "messages": [{"role": "user", "content": []}]})
+    assert calls["n"] == 0
+
+
+def test_image_only_user_content_rejected_before_http(monkeypatch):
+    client, calls = make_client(monkeypatch, [FakeResponse(200, GOOD)])
+    image_block = {"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": "iVBOR"}}
+    with pytest.raises(PayloadError, match="no user-role text"):
+        client.route({"model": "m", "messages": [{"role": "user", "content": [image_block]}]})
+    assert calls["n"] == 0
+
+
 def test_route_parses_decision(monkeypatch):
     client, _ = make_client(monkeypatch, [FakeResponse(200, GOOD)])
     d = client.route({"model": "m", "messages": [{"role": "user", "content": "hi"}]})
@@ -88,7 +114,10 @@ def test_missing_provider_is_contract_error(monkeypatch):
         client.route({"model": "m", "messages": [{"role": "user", "content": "hi"}]})
 
 
-def test_exhausted_retries_raise_unavailable(monkeypatch):
+def test_exhausted_503_retries_surface_contract_error(monkeypatch):
+    # Intended behavior: HTTP-level 503s are retried, and the FINAL 503 is
+    # parsed and surfaced as a ContractError. RouterUnavailable is reserved
+    # for transport failures (see test_connection_errors_raise_unavailable).
     client, calls = make_client(monkeypatch, [FakeResponse(503, text="scorer down")])
     with pytest.raises(ContractError, match="503"):
         client.route({"model": "m", "messages": [{"role": "user", "content": "hi"}]})
