@@ -1,0 +1,78 @@
+{
+  "fetched": "2026-06-10",
+  "url": "https://openrouter.ai/api/v1/models",
+  "models": [
+    {
+      "id": "deepseek/deepseek-v4-flash",
+      "pricing": {
+        "prompt": "0.0000000983",
+        "completion": "0.0000001966"
+      },
+      "name": "DeepSeek: DeepSeek V4 Flash"
+    },
+    {
+      "id": "deepseek/deepseek-v4-pro",
+      "pricing": {
+        "prompt": "0.000000435",
+        "completion": "0.00000087"
+      },
+      "name": "DeepSeek: DeepSeek V4 Pro"
+    },
+    {
+      "id": "google/gemini-3.1-flash-lite-preview",
+      "pricing": {
+        "prompt": "0.00000025",
+        "completion": "0.0000015"
+      },
+      "name": "Google: Gemini 3.1 Flash Lite Preview"
+    },
+    {
+      "id": "google/gemini-3.1-pro-preview",
+      "pricing": {
+        "prompt": "0.000002",
+        "completion": "0.000012"
+      },
+      "name": "Google: Gemini 3.1 Pro Preview"
+    },
+    {
+      "id": "google/gemini-3.5-flash",
+      "pricing": {
+        "prompt": "0.0000015",
+        "completion": "0.000009"
+      },
+      "name": "Google: Gemini 3.5 Flash"
+    },
+    {
+      "id": "moonshotai/kimi-k2.6",
+      "pricing": {
+        "prompt": "0.00000068",
+        "completion": "0.00000341"
+      },
+      "name": "MoonshotAI: Kimi K2.6"
+    },
+    {
+      "id": "qwen/qwen3-coder-next",
+      "pricing": {
+        "prompt": "0.00000011",
+        "completion": "0.0000008"
+      },
+      "name": "Qwen: Qwen3 Coder Next"
+    },
+    {
+      "id": "qwen/qwen3-next-80b-a3b-instruct",
+      "pricing": {
+        "prompt": "0.00000009",
+        "completion": "0.0000011"
+      },
+      "name": "Qwen: Qwen3 Next 80B A3B Instruct"
+    },
+    {
+      "id": "xiaomi/mimo-v2.5-pro",
+      "pricing": {
+        "prompt": "0.000000435",
+        "completion": "0.00000087"
+      },
+      "name": "Xiaomi: MiMo-V2.5-Pro"
+    }
+  ]
+}
