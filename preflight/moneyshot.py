@@ -106,7 +106,7 @@ def render(report_path: str | Path, out_path: str | Path) -> Path:
                f"Flip side: {easy_n} easy prompts (short factoids) were routed to frontier models.",
                font=sans, fill=CREAM)
         d.text((pad + 28, sy + 126),
-               "v0.65 ships quality-first (alpha=0.96). A knob, not a flaw. Budget for it.",
+               f"The {_require(report, 'meta', 'cluster_version')} artifact ships quality-first. Budget for the knob.",
                font=sans, fill=GRAY)
 
     d.line((pad, 580, W - pad, 580), fill=(60, 58, 56), width=2)

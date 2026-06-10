@@ -10,7 +10,9 @@ from __future__ import annotations
 import html
 import json
 from datetime import datetime, timezone
+from pathlib import Path
 
+from . import pricing
 from .checks import Finding
 
 
@@ -43,7 +45,6 @@ def build_report(meta: dict, decisions: list[dict], findings: list[Finding],
          "rules": [fl["rule"] for fl in r["evidence"]["flags"]]}
         for r in reviews[:2]
     ]
-    from . import pricing
     return {
         "tool": "router-preflight",
         "generated_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -188,7 +189,6 @@ auditor's prior, not ground truth. Single-box latency. Generated {e(report['gene
 
 
 def write_outputs(report: dict, out_dir) -> None:
-    from pathlib import Path
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     (out / "report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")

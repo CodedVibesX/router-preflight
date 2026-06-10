@@ -46,7 +46,7 @@ def route_corpus(client: RouteClient, entries) -> list[dict]:
             "reason": decision.reason,
             "latency_ms": decision.latency_ms,
             "est_in_tokens": heuristics.est_tokens(full_text),
-            "est_out_tokens": min(out_tokens, checks.DEFAULT_OUT_TOKENS * 8),
+            "est_out_tokens": out_tokens,
             "flags": [f._asdict() for f in flags],
             "easy": easy._asdict() if easy else None,
             "tier": pricing.tier_of(decision.model),
@@ -59,6 +59,7 @@ def determinism_probe(client: RouteClient, entries) -> list[dict]:
     # Stride 13, not a round 12: on the 60-entry corpus that is indices
     # 0/13/26/39/52, which reaches the hard_reasoning_debug bucket at the
     # tail; a stride of 12 would stop at index 48 and never probe it.
+    # The recorded run in output/ predates this fix and sampled stride 12.
     chosen = entries[::13][:PROBE_PROMPTS]
     probe = []
     for entry in chosen:

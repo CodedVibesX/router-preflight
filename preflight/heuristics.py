@@ -201,6 +201,8 @@ def full_request_text(request: dict) -> str:
     system = request.get("system")
     if isinstance(system, str):
         parts.append(system)
+    elif isinstance(system, list):
+        parts.append(json.dumps(system))
     for msg in request.get("messages", []):
         content = msg.get("content")
         if isinstance(content, str):

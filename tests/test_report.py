@@ -29,3 +29,5 @@ def test_committed_report_renders_and_numbers_match():
     # the four tile numbers in the HTML must come from headline values
     assert f"{report['headline']['prompts_routed']}" in html
     assert f"{report['headline']['frontier_share_pct']}%" in html
+    assert f"{report['headline']['cost_delta_pct_vs_requested']:+.1f}%" in html
+    assert f"{report['headline']['median_decision_ms']:.0f}ms" in html

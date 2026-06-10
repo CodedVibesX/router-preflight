@@ -3,9 +3,11 @@
 Every price is a public list price in USD per million tokens with its
 source URL and the date it was read. None of these numbers are invented:
 the OpenRouter rows were fetched live from openrouter.ai/api/v1/models on
-2026-06-10, and a filtered extract of that response covering the 9 models
-priced from it is committed at data/openrouter_prices_2026-06-10.json;
-the rest were read from the vendors' published pricing pages the same day.
+2026-06-10, and a filtered extract of that response is committed at
+data/openrouter_prices_2026-06-10.json: the 8 models priced from it, plus
+gemini-3.1-pro-preview kept in the extract as a cross-check against the
+Google page it is actually priced from. The rest were read from the
+vendors' published pricing pages the same day.
 A model with no verifiable price gets price=None (UNKNOWN) and is excluded
 from all cost math, with a warning the caller is expected to surface.
 
@@ -89,11 +91,6 @@ def cost_usd(model: str, in_tokens: int, out_tokens: int) -> Optional[float]:
     if info is None or not info.known:
         return None
     return (in_tokens * info.usd_in + out_tokens * info.usd_out) / 1_000_000
-
-
-def unknown_priced(models: set[str] | None = None) -> list[str]:
-    pool = PRICES.values() if models is None else (PRICES[m] for m in models if m in PRICES)
-    return sorted(p.model for p in pool if not p.known)
 
 
 def pricing_table() -> list[dict]:

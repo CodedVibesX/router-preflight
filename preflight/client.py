@@ -13,7 +13,7 @@ Two contract details drive the design:
     reject garbage.
   * Only "model" and "provider" are stable outputs. "reason" is a
     diagnostic string whose format can change between cluster versions,
-    so it is carried through verbatim and never parsed.
+    so it is carried through verbatim and never parsed by this client.
 """
 from __future__ import annotations
 
@@ -46,7 +46,6 @@ class RouteDecision:
     model: str
     provider: str
     reason: str
-    status_code: int
     latency_ms: float
 
 
@@ -104,7 +103,7 @@ class RouteClient:
         self.session = requests.Session()
         self.session.headers.update({
             "Authorization": f"Bearer {router_key}",
-            "content-type": "application/json",
+            "Content-Type": "application/json",
         })
 
     def health(self) -> bool:
@@ -153,6 +152,5 @@ class RouteClient:
             model=data["model"],
             provider=data["provider"],
             reason=str(data.get("reason", "")),
-            status_code=resp.status_code,
             latency_ms=round(latency_ms, 2),
         )

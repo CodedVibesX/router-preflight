@@ -33,7 +33,6 @@ def test_cost_usd_returns_none_for_unknown_price(monkeypatch):
                         pricing.ModelPrice("mystery-model", "acme", pricing.MID,
                                            None, None, "nowhere"))
     assert pricing.cost_usd("mystery-model", 1000, 1000) is None
-    assert "mystery-model" in pricing.unknown_priced()
 
 
 def test_pricing_table_carries_sources():
@@ -43,8 +42,9 @@ def test_pricing_table_carries_sources():
 
 
 def test_openrouter_rows_match_committed_snapshot():
-    """The 9 OpenRouter-sourced prices must equal the live snapshot
-    fetched on 2026-06-10 and committed under data/."""
+    """The 8 OpenRouter-sourced prices must equal the live snapshot
+    fetched on 2026-06-10 and committed under data/. (The snapshot's
+    9th row, gemini-3.1-pro-preview, is priced from Google's page.)"""
     import json
     from pathlib import Path
     snap_path = Path(__file__).resolve().parents[1] / "data" / "openrouter_prices_2026-06-10.json"

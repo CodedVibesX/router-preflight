@@ -14,7 +14,7 @@ Everything in `output/` comes from one real run: 60 prompts routed live against 
     decision speed : p50 25ms / p95 84ms
     review flags   : 2
 
-The two review flags are the interesting part. `refactor_06` (split a 900-line God class, plan the extraction order) and `refactor_07` (introduce dependency injection across 12 files) both landed on claude-haiku-4-5, the cheapest model in the registry, while the other eight repo-refactor prompts went frontier. Maybe haiku handles them fine. Maybe not. That is exactly the kind of decision you want surfaced before an agent burns a workday on it, and it is why the verdict is REVIEW rather than PASS or FAIL.
+The two review flags are the interesting part. `refactor_06` (split a 900-line God class, plan the extraction order) and `refactor_07` (introduce dependency injection across 12 files) both landed on claude-haiku-4-5, the cheapest Anthropic model in the registry and the router's own hard-pin default, while the other eight repo-refactor prompts went frontier. Maybe haiku handles them fine. Maybe not. That is exactly the kind of decision you want surfaced before an agent burns a workday on it, and it is why the verdict is REVIEW rather than PASS or FAIL.
 
 The flip side got measured too: 9 of 10 trivial factoid prompts went to frontier models. The v0.65 artifact ships quality-first (alpha=0.96, and the server logs say so loudly). That is a knob setting, not a bug. The gate's job is to put a number on what the knob costs you: about +53% over sending everything to the model you asked for, on this corpus.
 
@@ -29,7 +29,7 @@ The flip side got measured too: 9 of 10 trivial factoid prompts went to frontier
 | RP-005 | risk-flagged prompt routed to a budget model | REVIEW, one finding per occurrence |
 | RP-006 | easy prompts routed to frontier (savings left on the table) | info |
 | RP-007 | projected corpus cost vs requested-model baseline | info, ESTIMATE |
-| RP-008 | decision stability, 5 prompts x 3 calls, every 13th corpus entry so the sample reaches the hard_reasoning_debug bucket | WARN if unstable |
+| RP-008 | decision stability, 5 prompts x 3 calls | WARN if unstable |
 
 FAIL is reserved for runs the gate itself cannot trust: router down, auth broken, contract violated. Routing choices the heuristics disagree with are REVIEW, never FAIL, because the corpus prior can be wrong and the knobs might be deliberate. Exit codes: 0 PASS, 1 REVIEW, 2 FAIL.
 
@@ -52,6 +52,8 @@ Then:
         --corpus corpus/coding_agent_v1.jsonl --out output/
     python -m preflight.moneyshot output/report.json output/moneyshot.png
 
+The card renderer looks for DejaVu TTFs at the Debian path; on other hosts point MONEYSHOT_FONT_DIR at a directory that has them.
+
 Tests run offline against recorded fixtures; the live suite is opt-in:
 
     pytest                                   # 78 pass offline, 2 live tests skip
@@ -59,7 +61,7 @@ Tests run offline against recorded fixtures; the live suite is opt-in:
 
 ## The corpus
 
-`corpus/coding_agent_v1.jsonl` is a curated synthetic corpus, not customer data: 60 prompts, six buckets of ten (trivial factoids, formatting/SQL, single-file codegen, repo-scope refactors, agentic tool loops with real tool schemas and tool_result turns, hard reasoning and nondeterministic debugging). Each entry carries `expected_tier`, which is the auditor's prior about where the prompt could safely land. It is a label for analysis, never ground truth; nobody graded model outputs here.
+`corpus/coding_agent_v1.jsonl` is a curated synthetic corpus, not customer data: 60 prompts, six buckets of ten (trivial factoids, formatting/SQL, single-file codegen, repo-scope refactors, agentic tool loops with real tool schemas and tool_result turns, hard reasoning and nondeterministic debugging). Each entry carries `expected_tier`, the auditor's prior about where the prompt could safely land. It is a label for analysis; nobody graded any model outputs here, and no check treats the label as a grade.
 
 Sixty synthetic prompts tell you about the router. Your own prompts tell you about your bill:
 
@@ -70,19 +72,19 @@ The importer reads `~/.claude/projects/**/*.jsonl`, keeps only text you actually
 
 ## What I learned building it
 
-The contract gotcha drove the client design. The route endpoint returns 200 for any JSON object, so a typo like `"mesages"` silently routes on empty text and you get a confident-looking decision about nothing. The client validates its own payloads before sending; that check exists because I hit the failure, not because a linter suggested it.
+The contract gotcha drove the client design. The route endpoint returns 200 for any JSON object, so a typo like `"mesages"` silently routes on empty text and you get a confident-looking decision about nothing. The client validates its own payloads before sending; that check exists because I hit the failure myself.
 
 Decision latency is a real budget line for agents. 25ms median sounds free until you remember an agent loop makes hundreds of route calls per session. p95 here was 84ms on one box with the embedder warm.
 
-And the determinism probe needed honesty: repeats came back 5/5 identical, but the router runs a semantic cache, so that measures the repeat stability a client actually sees, not raw scorer determinism. The finding says so.
+And the determinism probe needed honesty twice. Repeats came back 5/5 identical, but the router runs a semantic cache, so the probe measures the repeat stability a client actually sees; raw scorer determinism would need the cache off, and the finding says so. The sampling itself also got a fix after the recorded run: the run in output/ probed every 12th corpus entry and stopped short of the hard_reasoning_debug bucket, so the shipped code strides by 13, which reaches it.
 
 ## Limitations and non-goals
 
 - This is a decision audit. It never calls an LLM and cannot tell you whether haiku would have answered those two refactor prompts well. Pairing decisions with output quality scoring is the obvious next layer and is out of scope here.
-- Token counts are len/4 estimates and output tokens are a max_tokens-capped guess (default 1024, hard ceiling 8192: a request asking for more than 8192 output tokens is still counted at 8192). Every dollar figure is an ESTIMATE built from those counts and public list prices as of June 10, 2026, with per-row source URLs in `preflight/pricing.py` and a committed filtered extract (9 models) of the OpenRouter models API response in `data/`. A model without a verifiable price would be excluded from cost math and disclosed; in v0.65 all 15 have prices.
+- Token counts are len/4 estimates and output tokens are a max_tokens-capped guess (default 1024). Every dollar figure is an ESTIMATE built from those counts and public list prices as of June 10, 2026, with per-row source URLs in `preflight/pricing.py` and a committed filtered extract (9 models) of the OpenRouter models API response in `data/`. A model without a verifiable price would be excluded from cost math and disclosed; in v0.65 all 15 have prices.
 - The corpus is curated synthetic data unless you import your own history. Results reflect the v0.65 default knobs; retrain the artifact or change alpha and the numbers move.
 - The heuristics are recall-imperfect priors. Known miss in the shipped corpus: `refactor_09` (Django multi-tenant rework) fires no rule, so RP-005 would stay silent if it routed cheap. Tightening rules until they catch everything would just overfit the corpus.
-- Latency numbers are single-box, client-measured, embedder warm. Not a load test.
+- Latency numbers are single-box, client-measured, embedder warm, and say nothing about behavior under load.
 - Tier boundaries are a documented judgment call (vendor model-class naming cross-checked against blended list price). `output/decisions.jsonl` keeps model and price per prompt so you can re-cut the tiers without rerunning.
 
 ## License
