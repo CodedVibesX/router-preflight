@@ -1,0 +1,6 @@
+{"type": "user", "isMeta": true, "message": {"role": "user", "content": "<command-name>/clear</command-name>"}}
+{"type": "user", "message": {"role": "user", "content": "Fix the race condition in worker.py, my email is dev@example.com and the key is sk-ant-abc12345678 in /home/larry/secrets.env"}}
+{"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": "Looking at worker.py now."}]}}
+{"type": "user", "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "tu_9", "content": "exit 0"}]}}
+{"type": "user", "message": {"role": "user", "content": [{"type": "text", "text": "now add a retry with backoff to the fetcher at 10.0.0.5"}]}}
+{"type": "summary", "summary": "session about workers"}
