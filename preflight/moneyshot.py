@@ -37,6 +37,17 @@ def _require(report: dict, *path):
     return node
 
 
+def footer_text(report: dict) -> str:
+    """Attribution line built from report.json meta, never a literal.
+    run_preflight.py records cluster_version (parsed from a decision
+    reason string) and run_date (the run's date) into meta; _require
+    raises if either is missing, so a stale or hand-edited footer
+    cannot ship."""
+    cluster = _require(report, "meta", "cluster_version")
+    run_date = _require(report, "meta", "run_date")
+    return f"live run vs workweave/router {cluster} cluster artifact, {run_date}"
+
+
 def render(report_path: str | Path, out_path: str | Path) -> Path:
     report = json.loads(Path(report_path).read_text(encoding="utf-8"))
     verdict = _require(report, "verdict")
@@ -99,8 +110,7 @@ def render(report_path: str | Path, out_path: str | Path) -> Path:
                font=sans, fill=GRAY)
 
     d.line((pad, 580, W - pad, 580), fill=(60, 58, 56), width=2)
-    d.text((pad, 598), "live run vs workweave/router v0.65 cluster artifact, June 10 2026",
-           font=mono_sm, fill=GRAY)
+    d.text((pad, 598), footer_text(report), font=mono_sm, fill=GRAY)
     d.text((pad, 624), "github.com/CodedVibesX/router-preflight", font=mono_sm, fill=ORANGE)
 
     out = Path(out_path)
