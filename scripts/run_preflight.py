@@ -56,9 +56,10 @@ def route_corpus(client: RouteClient, entries) -> list[dict]:
 
 
 def determinism_probe(client: RouteClient, entries) -> list[dict]:
-    # One probe prompt per bucket order, spread across difficulty.
-    step = max(1, len(entries) // PROBE_PROMPTS)
-    chosen = entries[::step][:PROBE_PROMPTS]
+    # Stride 13, not a round 12: on the 60-entry corpus that is indices
+    # 0/13/26/39/52, which reaches the hard_reasoning_debug bucket at the
+    # tail; a stride of 12 would stop at index 48 and never probe it.
+    chosen = entries[::13][:PROBE_PROMPTS]
     probe = []
     for entry in chosen:
         models = [client.route(entry.request).model for _ in range(PROBE_CALLS)]

@@ -194,9 +194,11 @@ def rp008_determinism(probe: list[dict]) -> Finding:
 
 
 def gate_verdict(findings: list[Finding]) -> str:
-    """FAIL only when the run itself cannot be trusted (RP-001/RP-002).
+    """FAIL when ANY finding carries severity FAIL. Today only RP-001 and
+    RP-002 emit FAIL, but the gate keys on the severity, not the check id,
+    so a future FAIL-emitting check cannot silently pass the gate.
     REVIEW when any risk-flagged prompt hit the budget tier. Else PASS."""
-    if any(f.severity == FAIL and f.check in ("RP-001", "RP-002") for f in findings):
+    if any(f.severity == FAIL for f in findings):
         return FAIL
     if any(f.severity == REVIEW for f in findings):
         return REVIEW

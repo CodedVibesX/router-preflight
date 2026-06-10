@@ -12,11 +12,15 @@ SAMPLE = Path(__file__).resolve().parent / "fixtures" / "sample_claude_history.j
 
 def test_extracts_only_typed_user_text():
     texts = extract_user_texts(SAMPLE)
-    # meta command echo, assistant turn, tool_result turn, and summary line
-    # must all be skipped; the two real user messages survive.
-    assert len(texts) == 2
+    # meta command echo, assistant turn, tool_result turn, summary line, and
+    # the three known Claude Code echo shapes (<command-name>,
+    # <local-command-stdout>, <system-...>) must all be skipped; the three
+    # real user messages survive, including the one that begins with pasted
+    # XML/JSX, which a bare startswith("<") filter would wrongly drop.
+    assert len(texts) == 3
     assert texts[0].startswith("Fix the race condition")
     assert texts[1].startswith("now add a retry")
+    assert texts[2].startswith("<Button onClick={save}/>")
 
 
 def test_redact_scrubs_keys_emails_paths_ips():

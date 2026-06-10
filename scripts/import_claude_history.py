@@ -23,6 +23,12 @@ import re
 import sys
 from pathlib import Path
 
+# Synthetic echo lines Claude Code writes into the transcript as user
+# turns: command echoes, captured command stdout, and system-injected
+# context. Matched by exact prefix so a legit prompt that begins with
+# pasted XML/HTML is kept.
+_ECHO_PREFIXES = ("<command-name>", "<local-command-stdout>", "<system-")
+
 # Redaction is best-effort hygiene for sharing, not a DLP guarantee.
 _REDACTIONS = (
     (re.compile(r"\b(sk|rk|sk-ant|sk-or-v1)[-_][A-Za-z0-9_-]{8,}"), "[REDACTED_KEY]"),
@@ -64,7 +70,7 @@ def extract_user_texts(session_file: Path) -> list[str]:
         else:
             continue
         text = "\n".join(p for p in parts if p).strip()
-        if text and not text.startswith("<"):
+        if text and not text.startswith(_ECHO_PREFIXES):
             texts.append(text)
     return texts
 

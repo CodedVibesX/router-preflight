@@ -29,7 +29,7 @@ The flip side got measured too: 9 of 10 trivial factoid prompts went to frontier
 | RP-005 | risk-flagged prompt routed to a budget model | REVIEW, one finding per occurrence |
 | RP-006 | easy prompts routed to frontier (savings left on the table) | info |
 | RP-007 | projected corpus cost vs requested-model baseline | info, ESTIMATE |
-| RP-008 | decision stability, 5 prompts x 3 calls | WARN if unstable |
+| RP-008 | decision stability, 5 prompts x 3 calls, every 13th corpus entry so the sample reaches the hard_reasoning_debug bucket | WARN if unstable |
 
 FAIL is reserved for runs the gate itself cannot trust: router down, auth broken, contract violated. Routing choices the heuristics disagree with are REVIEW, never FAIL, because the corpus prior can be wrong and the knobs might be deliberate. Exit codes: 0 PASS, 1 REVIEW, 2 FAIL.
 
@@ -54,7 +54,7 @@ Then:
 
 Tests run offline against recorded fixtures; the live suite is opt-in:
 
-    pytest                                   # 73 pass offline, 2 live tests skip
+    pytest                                   # 78 pass offline, 2 live tests skip
     RUN_LIVE=1 WEAVE_ROUTER_KEY=rk_... pytest tests/test_live_integration.py
 
 ## The corpus
@@ -79,7 +79,7 @@ And the determinism probe needed honesty: repeats came back 5/5 identical, but t
 ## Limitations and non-goals
 
 - This is a decision audit. It never calls an LLM and cannot tell you whether haiku would have answered those two refactor prompts well. Pairing decisions with output quality scoring is the obvious next layer and is out of scope here.
-- Token counts are len/4 estimates and output tokens are a max_tokens-capped guess (default 1024). Every dollar figure is an ESTIMATE built from those counts and public list prices as of June 10, 2026, with per-row source URLs in `preflight/pricing.py` and a committed OpenRouter snapshot in `data/`. A model without a verifiable price would be excluded from cost math and disclosed; in v0.65 all 15 have prices.
+- Token counts are len/4 estimates and output tokens are a max_tokens-capped guess (default 1024, hard ceiling 8192: a request asking for more than 8192 output tokens is still counted at 8192). Every dollar figure is an ESTIMATE built from those counts and public list prices as of June 10, 2026, with per-row source URLs in `preflight/pricing.py` and a committed filtered extract (9 models) of the OpenRouter models API response in `data/`. A model without a verifiable price would be excluded from cost math and disclosed; in v0.65 all 15 have prices.
 - The corpus is curated synthetic data unless you import your own history. Results reflect the v0.65 default knobs; retrain the artifact or change alpha and the numbers move.
 - The heuristics are recall-imperfect priors. Known miss in the shipped corpus: `refactor_09` (Django multi-tenant rework) fires no rule, so RP-005 would stay silent if it routed cheap. Tightening rules until they catch everything would just overfit the corpus.
 - Latency numbers are single-box, client-measured, embedder warm. Not a load test.

@@ -3,4 +3,8 @@
 {"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": "Looking at worker.py now."}]}}
 {"type": "user", "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "tu_9", "content": "exit 0"}]}}
 {"type": "user", "message": {"role": "user", "content": [{"type": "text", "text": "now add a retry with backoff to the fetcher at 10.0.0.5"}]}}
+{"type": "user", "message": {"role": "user", "content": "<command-name>/compact</command-name>"}}
+{"type": "user", "message": {"role": "user", "content": "<local-command-stdout>total 0</local-command-stdout>"}}
+{"type": "user", "message": {"role": "user", "content": "<system-reminder>context low</system-reminder>"}}
+{"type": "user", "message": {"role": "user", "content": "<Button onClick={save}/> never fires its handler, why?"}}
 {"type": "summary", "summary": "session about workers"}

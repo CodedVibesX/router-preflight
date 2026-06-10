@@ -3,7 +3,8 @@
 Every price is a public list price in USD per million tokens with its
 source URL and the date it was read. None of these numbers are invented:
 the OpenRouter rows were fetched live from openrouter.ai/api/v1/models on
-2026-06-10 (raw snapshot committed at data/openrouter_prices_2026-06-10.json),
+2026-06-10, and a filtered extract of that response covering the 9 models
+priced from it is committed at data/openrouter_prices_2026-06-10.json;
 the rest were read from the vendors' published pricing pages the same day.
 A model with no verifiable price gets price=None (UNKNOWN) and is excluded
 from all cost math, with a warning the caller is expected to surface.

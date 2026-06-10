@@ -16,7 +16,7 @@ def fired(rule_fn, text, request=None):
 
 def test_math_proof_fires_on_proof_language():
     flag = fired(h.math_proof, "Prove the loop invariant holds by induction.")
-    assert flag and "induction" in flag.evidence or "prove" in flag.evidence.lower()
+    assert flag and ("induction" in flag.evidence or "prove" in flag.evidence.lower())
 
 
 def test_math_proof_ignores_plain_question():
