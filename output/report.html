@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>router-preflight report</title><style>
+:root { --orange:#EC6341; --cream:#FDF1E9; --ink:#0E0E10; }
+* { box-sizing:border-box; margin:0; }
+body { background:var(--cream); color:var(--ink);
+       font-family:Georgia,'Times New Roman',serif; padding:48px 24px; }
+.wrap { max-width:980px; margin:0 auto; }
+.label { font-family:'SF Mono',Menlo,Consolas,monospace; font-size:12px;
+         letter-spacing:.12em; text-transform:uppercase; color:var(--orange); }
+h1 { font-size:42px; font-weight:600; margin:6px 0 2px; }
+.sub { font-size:17px; color:#52525b; margin-bottom:28px; }
+.verdict { display:inline-block; font-family:Menlo,Consolas,monospace; font-size:15px;
+           padding:6px 18px; border-radius:4px; color:var(--cream); margin-bottom:28px; }
+.v-PASS { background:#1a7f4e; } .v-REVIEW { background:var(--orange); } .v-FAIL { background:#b3261e; }
+.grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:34px; }
+.tile { background:var(--ink); color:var(--cream); border-radius:6px; padding:18px 16px; }
+.tile .n { font-size:30px; font-family:Menlo,Consolas,monospace; }
+.tile .t { font-family:Menlo,Consolas,monospace; font-size:11px; letter-spacing:.08em;
+           text-transform:uppercase; color:var(--orange); margin-top:6px; }
+table { width:100%; border-collapse:collapse; margin:10px 0 30px; font-size:14px; }
+th { font-family:Menlo,Consolas,monospace; font-size:11px; letter-spacing:.08em;
+     text-transform:uppercase; text-align:left; color:#52525b;
+     border-bottom:2px solid var(--ink); padding:8px 10px; }
+td { padding:8px 10px; border-bottom:1px solid #e4d5c8; vertical-align:top; }
+td.mono, .mono { font-family:Menlo,Consolas,monospace; font-size:13px; }
+.sev { font-family:Menlo,Consolas,monospace; font-size:12px; padding:2px 8px; border-radius:3px; }
+.s-PASS { background:#d7eadf; color:#1a7f4e; } .s-INFO { background:#e8e2dc; }
+.s-WARN { background:#f6d9a8; } .s-REVIEW { background:#fbd1c4; color:#a33415; }
+.s-FAIL { background:#b3261e; color:#fff; }
+.foot { font-size:13px; color:#52525b; border-top:2px solid var(--ink); padding-top:14px; }
+h2 { font-size:22px; margin:26px 0 4px; }
+</style></head>
+<body><div class="wrap">
+<div class="label">router-preflight // live decision audit</div>
+<h1>Is this router safe to point my coding agent at?</h1>
+<div class="sub">Replayed 60 curated coding-agent prompts through
+POST /v1/route on http://localhost:8080 (workweave/router, cluster v0.65),
+2026-06-10. Decisions only; no LLM was called.</div>
+<span class="verdict v-REVIEW">verdict: REVIEW</span>
+<div class="grid"><div class="tile"><div class="n">60</div><div class="t">prompts routed live</div></div><div class="tile"><div class="n">78.3%</div><div class="t">frontier share</div></div><div class="tile"><div class="n">+52.7%</div><div class="t">est. cost vs requested</div></div><div class="tile"><div class="n">25ms</div><div class="t">median decision</div></div></div>
+<div class="label">findings</div>
+<table><tr><th>check</th><th>severity</th><th>finding</th></tr><tr><td class="mono">RP-001</td><td><span class="sev s-PASS">PASS</span></td><td><strong>reachable and authenticated</strong><br>GET /health 200 and an authenticated /v1/route canary returned a decision.</td></tr><tr><td class="mono">RP-002</td><td><span class="sev s-PASS">PASS</span></td><td><strong>contract conformant</strong><br>all 60 decisions had model+provider and every chosen model is in the v0.65 registry.</td></tr><tr><td class="mono">RP-003</td><td><span class="sev s-INFO">INFO</span></td><td><strong>decision latency p50=25ms p95=84ms</strong><br>decision overhead per agent turn, measured client-side on one box</td></tr><tr><td class="mono">RP-004</td><td><span class="sev s-INFO">INFO</span></td><td><strong>tier mix: 78.3% frontier / 6.7% mid / 15.0% budget</strong><br>share of decisions by price tier, overall and per bucket.</td></tr><tr><td class="mono">RP-005</td><td><span class="sev s-REVIEW">REVIEW</span></td><td><strong>risk-flagged prompt routed to budget tier: refactor_06</strong><br>refactor_06 (repo_refactor) fired [bloom_higher_order] but was routed to claude-haiku-4-5 (anthropic).</td></tr><tr><td class="mono">RP-005</td><td><span class="sev s-REVIEW">REVIEW</span></td><td><strong>risk-flagged prompt routed to budget tier: refactor_07</strong><br>refactor_07 (repo_refactor) fired [repo_scope] but was routed to claude-haiku-4-5 (anthropic).</td></tr><tr><td class="mono">RP-006</td><td><span class="sev s-INFO">INFO</span></td><td><strong>savings left on the table: 9 easy prompts on frontier</strong><br>9 counter-rule (easy) prompts were routed to frontier models; sending them to claude-haiku-4-5 (the router&#x27;s own hard-pin default) would save ~$0.2072 on this corpus. ESTIMATE.</td></tr><tr><td class="mono">RP-007</td><td><span class="sev s-INFO">INFO</span></td><td><strong>projected corpus cost +52.7% vs requested baseline (ESTIMATE)</strong><br>ESTIMATE over 60 prompts: routed $2.0893 vs requested-model baseline $1.3681 (+0.7212, +52.7%). Basis: len/4 token estimate over the full request text, output capped at max_tokens (default guess 1024).</td></tr><tr><td class="mono">RP-008</td><td><span class="sev s-INFO">INFO</span></td><td><strong>decision stability 5/5 prompts</strong><br>5/5 probe prompts got the same model on all 3 calls. Note: the router&#x27;s semantic cache can answer repeats, so this measures the repeat-call stability a client actually sees, not raw scorer determinism.</td></tr></table>
+<div class="label">tier mix per bucket</div>
+<table><tr><th>bucket</th><th>frontier</th><th>mid</th><th>budget</th></tr><tr><td class="mono">agentic_tool_loop</td><td class="mono">80.0%</td><td class="mono">20.0%</td><td class="mono">0.0%</td></tr><tr><td class="mono">formatting_sql</td><td class="mono">40.0%</td><td class="mono">0.0%</td><td class="mono">60.0%</td></tr><tr><td class="mono">hard_reasoning_debug</td><td class="mono">100.0%</td><td class="mono">0.0%</td><td class="mono">0.0%</td></tr><tr><td class="mono">repo_refactor</td><td class="mono">80.0%</td><td class="mono">0.0%</td><td class="mono">20.0%</td></tr><tr><td class="mono">single_file_codegen</td><td class="mono">80.0%</td><td class="mono">10.0%</td><td class="mono">10.0%</td></tr><tr><td class="mono">trivial_factoid</td><td class="mono">90.0%</td><td class="mono">10.0%</td><td class="mono">0.0%</td></tr></table>
+<div class="label">pricing basis (public list prices)</div>
+<table><tr><th>model</th><th>tier</th><th>$/Mtok in / out</th><th>source (seen)</th></tr><tr><td class="mono">claude-haiku-4-5</td><td class="mono">budget</td><td class="mono">$1.0 / $5.0</td><td class="mono">https://platform.claude.com/docs/en/about-claude/pricing (2026-06-10)</td></tr><tr><td class="mono">deepseek/deepseek-v4-flash</td><td class="mono">budget</td><td class="mono">$0.0983 / $0.1966</td><td class="mono">https://openrouter.ai/api/v1/models (2026-06-10)</td></tr><tr><td class="mono">gemini-3.1-flash-lite-preview</td><td class="mono">budget</td><td class="mono">$0.25 / $1.5</td><td class="mono">https://openrouter.ai/api/v1/models (2026-06-10)</td></tr><tr><td class="mono">gpt-5.4-mini</td><td class="mono">budget</td><td class="mono">$0.75 / $4.5</td><td class="mono">https://developers.openai.com/api/docs/pricing (2026-06-10)</td></tr><tr><td class="mono">qwen/qwen3-coder-next</td><td class="mono">budget</td><td class="mono">$0.11 / $0.8</td><td class="mono">https://openrouter.ai/api/v1/models (2026-06-10)</td></tr><tr><td class="mono">qwen/qwen3-next-80b-a3b-instruct</td><td class="mono">budget</td><td class="mono">$0.09 / $1.1</td><td class="mono">https://openrouter.ai/api/v1/models (2026-06-10)</td></tr><tr><td class="mono">claude-opus-4-7</td><td class="mono">frontier</td><td class="mono">$5.0 / $25.0</td><td class="mono">https://platform.claude.com/docs/en/about-claude/pricing (2026-06-10)</td></tr><tr><td class="mono">claude-opus-4-8</td><td class="mono">frontier</td><td class="mono">$5.0 / $25.0</td><td class="mono">https://platform.claude.com/docs/en/about-claude/pricing (2026-06-10)</td></tr><tr><td class="mono">gemini-3.1-pro-preview</td><td class="mono">frontier</td><td class="mono">$2.0 / $12.0</td><td class="mono">https://ai.google.dev/gemini-api/docs/pricing (2026-06-10)</td></tr><tr><td class="mono">gpt-5.5</td><td class="mono">frontier</td><td class="mono">$5.0 / $30.0</td><td class="mono">https://openai.com/api/pricing (2026-06-10)</td></tr><tr><td class="mono">claude-sonnet-4-6</td><td class="mono">mid</td><td class="mono">$3.0 / $15.0</td><td class="mono">https://platform.claude.com/docs/en/about-claude/pricing (2026-06-10)</td></tr><tr><td class="mono">deepseek/deepseek-v4-pro</td><td class="mono">mid</td><td class="mono">$0.435 / $0.87</td><td class="mono">https://openrouter.ai/api/v1/models (2026-06-10)</td></tr><tr><td class="mono">gemini-3.5-flash</td><td class="mono">mid</td><td class="mono">$1.5 / $9.0</td><td class="mono">https://openrouter.ai/api/v1/models (2026-06-10)</td></tr><tr><td class="mono">moonshotai/kimi-k2.6</td><td class="mono">mid</td><td class="mono">$0.68 / $3.41</td><td class="mono">https://openrouter.ai/api/v1/models (2026-06-10)</td></tr><tr><td class="mono">xiaomi/mimo-v2.5-pro</td><td class="mono">mid</td><td class="mono">$0.435 / $0.87</td><td class="mono">https://openrouter.ai/api/v1/models (2026-06-10)</td></tr></table>
+<div class="foot">All dollar figures are estimates: list prices x len/4 token counts, output capped at
+max_tokens. The corpus is curated synthetic data, not customer traffic. expected_tier labels are the
+auditor's prior, not ground truth. Single-box latency. Generated 2026-06-10T06:09:55+00:00.</div>
+</div></body></html>

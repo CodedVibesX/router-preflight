@@ -1,0 +1,1602 @@
+{
+  "tool": "router-preflight",
+  "generated_utc": "2026-06-10T06:09:55+00:00",
+  "meta": {
+    "base_url": "http://localhost:8080",
+    "corpus": "corpus/coding_agent_v1.jsonl",
+    "cluster_version": "v0.65",
+    "run_date": "2026-06-10",
+    "corpus_kind": "curated synthetic (not customer data)"
+  },
+  "verdict": "REVIEW",
+  "headline": {
+    "prompts_routed": 60,
+    "frontier_share_pct": 78.3,
+    "cost_delta_pct_vs_requested": 52.7,
+    "routed_usd": 2.0893,
+    "baseline_usd": 1.3681,
+    "median_decision_ms": 25.08,
+    "p95_decision_ms": 84.01,
+    "review_count": 2,
+    "review_examples": [
+      {
+        "id": "refactor_06",
+        "model": "claude-haiku-4-5",
+        "rules": [
+          "bloom_higher_order"
+        ]
+      },
+      {
+        "id": "refactor_07",
+        "model": "claude-haiku-4-5",
+        "rules": [
+          "repo_scope"
+        ]
+      }
+    ],
+    "easy_on_frontier": 9,
+    "easy_savings_usd": 0.2072,
+    "determinism": {
+      "probes": [
+        {
+          "id": "trivial_01",
+          "models": [
+            "gpt-5.5",
+            "gpt-5.5",
+            "gpt-5.5"
+          ],
+          "stable": true
+        },
+        {
+          "id": "format_03",
+          "models": [
+            "claude-haiku-4-5",
+            "claude-haiku-4-5",
+            "claude-haiku-4-5"
+          ],
+          "stable": true
+        },
+        {
+          "id": "codegen_05",
+          "models": [
+            "gpt-5.5",
+            "gpt-5.5",
+            "gpt-5.5"
+          ],
+          "stable": true
+        },
+        {
+          "id": "refactor_07",
+          "models": [
+            "claude-haiku-4-5",
+            "claude-haiku-4-5",
+            "claude-haiku-4-5"
+          ],
+          "stable": true
+        },
+        {
+          "id": "agentic_09",
+          "models": [
+            "gpt-5.5",
+            "gpt-5.5",
+            "gpt-5.5"
+          ],
+          "stable": true
+        }
+      ]
+    }
+  },
+  "findings": [
+    {
+      "check": "RP-001",
+      "severity": "PASS",
+      "title": "reachable and authenticated",
+      "detail": "GET /health 200 and an authenticated /v1/route canary returned a decision.",
+      "evidence": {
+        "canary_model": "gpt-5.5"
+      }
+    },
+    {
+      "check": "RP-002",
+      "severity": "PASS",
+      "title": "contract conformant",
+      "detail": "all 60 decisions had model+provider and every chosen model is in the v0.65 registry."
+    },
+    {
+      "check": "RP-003",
+      "severity": "INFO",
+      "title": "decision latency p50=25ms p95=84ms",
+      "detail": "decision overhead per agent turn, measured client-side on one box",
+      "evidence": {
+        "p50_ms": 25.08,
+        "p95_ms": 84.01,
+        "min_ms": 8.48,
+        "max_ms": 111.63,
+        "n": 60
+      }
+    },
+    {
+      "check": "RP-004",
+      "severity": "INFO",
+      "title": "tier mix: 78.3% frontier / 6.7% mid / 15.0% budget",
+      "detail": "share of decisions by price tier, overall and per bucket.",
+      "evidence": {
+        "overall_pct": {
+          "frontier": 78.3,
+          "mid": 6.7,
+          "budget": 15.0
+        },
+        "per_bucket_pct": {
+          "agentic_tool_loop": {
+            "frontier": 80.0,
+            "mid": 20.0,
+            "budget": 0.0
+          },
+          "formatting_sql": {
+            "frontier": 40.0,
+            "mid": 0.0,
+            "budget": 60.0
+          },
+          "hard_reasoning_debug": {
+            "frontier": 100.0,
+            "mid": 0.0,
+            "budget": 0.0
+          },
+          "repo_refactor": {
+            "frontier": 80.0,
+            "mid": 0.0,
+            "budget": 20.0
+          },
+          "single_file_codegen": {
+            "frontier": 80.0,
+            "mid": 10.0,
+            "budget": 10.0
+          },
+          "trivial_factoid": {
+            "frontier": 90.0,
+            "mid": 10.0,
+            "budget": 0.0
+          }
+        }
+      }
+    },
+    {
+      "check": "RP-005",
+      "severity": "REVIEW",
+      "title": "risk-flagged prompt routed to budget tier: refactor_06",
+      "detail": "refactor_06 (repo_refactor) fired [bloom_higher_order] but was routed to claude-haiku-4-5 (anthropic).",
+      "evidence": {
+        "id": "refactor_06",
+        "bucket": "repo_refactor",
+        "model": "claude-haiku-4-5",
+        "flags": [
+          {
+            "rule": "bloom_higher_order",
+            "evidence": "matched 'extract'"
+          }
+        ]
+      }
+    },
+    {
+      "check": "RP-005",
+      "severity": "REVIEW",
+      "title": "risk-flagged prompt routed to budget tier: refactor_07",
+      "detail": "refactor_07 (repo_refactor) fired [repo_scope] but was routed to claude-haiku-4-5 (anthropic).",
+      "evidence": {
+        "id": "refactor_07",
+        "bucket": "repo_refactor",
+        "model": "claude-haiku-4-5",
+        "flags": [
+          {
+            "rule": "repo_scope",
+            "evidence": "matched '12 files'"
+          }
+        ]
+      }
+    },
+    {
+      "check": "RP-006",
+      "severity": "INFO",
+      "title": "savings left on the table: 9 easy prompts on frontier",
+      "detail": "9 counter-rule (easy) prompts were routed to frontier models; sending them to claude-haiku-4-5 (the router's own hard-pin default) would save ~$0.2072 on this corpus. ESTIMATE.",
+      "evidence": {
+        "count": 9,
+        "projected_savings_usd": 0.2072,
+        "anchor_model": "claude-haiku-4-5",
+        "examples": [
+          {
+            "id": "trivial_01",
+            "model": "gpt-5.5"
+          },
+          {
+            "id": "trivial_02",
+            "model": "gpt-5.5"
+          },
+          {
+            "id": "trivial_03",
+            "model": "gpt-5.5"
+          },
+          {
+            "id": "trivial_05",
+            "model": "gpt-5.5"
+          },
+          {
+            "id": "trivial_06",
+            "model": "gpt-5.5"
+          }
+        ]
+      }
+    },
+    {
+      "check": "RP-007",
+      "severity": "INFO",
+      "title": "projected corpus cost +52.7% vs requested baseline (ESTIMATE)",
+      "detail": "ESTIMATE over 60 prompts: routed $2.0893 vs requested-model baseline $1.3681 (+0.7212, +52.7%). Basis: len/4 token estimate over the full request text, output capped at max_tokens (default guess 1024).",
+      "evidence": {
+        "routed_usd": 2.0893,
+        "baseline_usd": 1.3681,
+        "delta_usd": 0.7212,
+        "delta_pct": 52.7,
+        "prompts_counted": 60,
+        "excluded_models": [],
+        "default_out_tokens": 1024
+      }
+    },
+    {
+      "check": "RP-008",
+      "severity": "INFO",
+      "title": "decision stability 5/5 prompts",
+      "detail": "5/5 probe prompts got the same model on all 3 calls. Note: the router's semantic cache can answer repeats, so this measures the repeat-call stability a client actually sees, not raw scorer determinism.",
+      "evidence": {
+        "probes": [
+          {
+            "id": "trivial_01",
+            "models": [
+              "gpt-5.5",
+              "gpt-5.5",
+              "gpt-5.5"
+            ],
+            "stable": true
+          },
+          {
+            "id": "format_03",
+            "models": [
+              "claude-haiku-4-5",
+              "claude-haiku-4-5",
+              "claude-haiku-4-5"
+            ],
+            "stable": true
+          },
+          {
+            "id": "codegen_05",
+            "models": [
+              "gpt-5.5",
+              "gpt-5.5",
+              "gpt-5.5"
+            ],
+            "stable": true
+          },
+          {
+            "id": "refactor_07",
+            "models": [
+              "claude-haiku-4-5",
+              "claude-haiku-4-5",
+              "claude-haiku-4-5"
+            ],
+            "stable": true
+          },
+          {
+            "id": "agentic_09",
+            "models": [
+              "gpt-5.5",
+              "gpt-5.5",
+              "gpt-5.5"
+            ],
+            "stable": true
+          }
+        ]
+      }
+    }
+  ],
+  "pricing": [
+    {
+      "model": "claude-haiku-4-5",
+      "provider": "anthropic",
+      "tier": "budget",
+      "usd_per_mtok_in": 1.0,
+      "usd_per_mtok_out": 5.0,
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "seen": "2026-06-10"
+    },
+    {
+      "model": "deepseek/deepseek-v4-flash",
+      "provider": "deepinfra",
+      "tier": "budget",
+      "usd_per_mtok_in": 0.0983,
+      "usd_per_mtok_out": 0.1966,
+      "source": "https://openrouter.ai/api/v1/models",
+      "seen": "2026-06-10"
+    },
+    {
+      "model": "gemini-3.1-flash-lite-preview",
+      "provider": "google",
+      "tier": "budget",
+      "usd_per_mtok_in": 0.25,
+      "usd_per_mtok_out": 1.5,
+      "source": "https://openrouter.ai/api/v1/models",
+      "seen": "2026-06-10"
+    },
+    {
+      "model": "gpt-5.4-mini",
+      "provider": "openai",
+      "tier": "budget",
+      "usd_per_mtok_in": 0.75,
+      "usd_per_mtok_out": 4.5,
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "seen": "2026-06-10"
+    },
+    {
+      "model": "qwen/qwen3-coder-next",
+      "provider": "bedrock",
+      "tier": "budget",
+      "usd_per_mtok_in": 0.11,
+      "usd_per_mtok_out": 0.8,
+      "source": "https://openrouter.ai/api/v1/models",
+      "seen": "2026-06-10"
+    },
+    {
+      "model": "qwen/qwen3-next-80b-a3b-instruct",
+      "provider": "bedrock",
+      "tier": "budget",
+      "usd_per_mtok_in": 0.09,
+      "usd_per_mtok_out": 1.1,
+      "source": "https://openrouter.ai/api/v1/models",
+      "seen": "2026-06-10"
+    },
+    {
+      "model": "claude-opus-4-7",
+      "provider": "anthropic",
+      "tier": "frontier",
+      "usd_per_mtok_in": 5.0,
+      "usd_per_mtok_out": 25.0,
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "seen": "2026-06-10"
+    },
+    {
+      "model": "claude-opus-4-8",
+      "provider": "anthropic",
+      "tier": "frontier",
+      "usd_per_mtok_in": 5.0,
+      "usd_per_mtok_out": 25.0,
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "seen": "2026-06-10"
+    },
+    {
+      "model": "gemini-3.1-pro-preview",
+      "provider": "google",
+      "tier": "frontier",
+      "usd_per_mtok_in": 2.0,
+      "usd_per_mtok_out": 12.0,
+      "source": "https://ai.google.dev/gemini-api/docs/pricing",
+      "seen": "2026-06-10"
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "openai",
+      "tier": "frontier",
+      "usd_per_mtok_in": 5.0,
+      "usd_per_mtok_out": 30.0,
+      "source": "https://openai.com/api/pricing",
+      "seen": "2026-06-10"
+    },
+    {
+      "model": "claude-sonnet-4-6",
+      "provider": "anthropic",
+      "tier": "mid",
+      "usd_per_mtok_in": 3.0,
+      "usd_per_mtok_out": 15.0,
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "seen": "2026-06-10"
+    },
+    {
+      "model": "deepseek/deepseek-v4-pro",
+      "provider": "fireworks",
+      "tier": "mid",
+      "usd_per_mtok_in": 0.435,
+      "usd_per_mtok_out": 0.87,
+      "source": "https://openrouter.ai/api/v1/models",
+      "seen": "2026-06-10"
+    },
+    {
+      "model": "gemini-3.5-flash",
+      "provider": "google",
+      "tier": "mid",
+      "usd_per_mtok_in": 1.5,
+      "usd_per_mtok_out": 9.0,
+      "source": "https://openrouter.ai/api/v1/models",
+      "seen": "2026-06-10"
+    },
+    {
+      "model": "moonshotai/kimi-k2.6",
+      "provider": "fireworks",
+      "tier": "mid",
+      "usd_per_mtok_in": 0.68,
+      "usd_per_mtok_out": 3.41,
+      "source": "https://openrouter.ai/api/v1/models",
+      "seen": "2026-06-10"
+    },
+    {
+      "model": "xiaomi/mimo-v2.5-pro",
+      "provider": "deepinfra",
+      "tier": "mid",
+      "usd_per_mtok_in": 0.435,
+      "usd_per_mtok_out": 0.87,
+      "source": "https://openrouter.ai/api/v1/models",
+      "seen": "2026-06-10"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "trivial_01",
+      "bucket": "trivial_factoid",
+      "expected_tier": "cheap_ok",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[0,5,12,13] model=gpt-5.5 provider=openai",
+      "latency_ms": 8.76,
+      "est_in_tokens": 10,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": {
+        "rule": "short_factoid",
+        "evidence": "single wh-question, ~10 est tokens"
+      },
+      "tier": "frontier"
+    },
+    {
+      "id": "trivial_02",
+      "bucket": "trivial_factoid",
+      "expected_tier": "cheap_ok",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[0,5,8,13] model=gpt-5.5 provider=openai",
+      "latency_ms": 9.59,
+      "est_in_tokens": 9,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": {
+        "rule": "short_factoid",
+        "evidence": "single wh-question, ~9 est tokens"
+      },
+      "tier": "frontier"
+    },
+    {
+      "id": "trivial_03",
+      "bucket": "trivial_factoid",
+      "expected_tier": "cheap_ok",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[5,8,12,15] model=gpt-5.5 provider=openai",
+      "latency_ms": 9.23,
+      "est_in_tokens": 8,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": {
+        "rule": "short_factoid",
+        "evidence": "single wh-question, ~8 est tokens"
+      },
+      "tier": "frontier"
+    },
+    {
+      "id": "trivial_04",
+      "bucket": "trivial_factoid",
+      "expected_tier": "cheap_ok",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "deepseek/deepseek-v4-pro",
+      "provider": "fireworks",
+      "reason": "cluster:v0.65 top_p=[1,5,7,13] model=deepseek/deepseek-v4-pro provider=fireworks",
+      "latency_ms": 9.57,
+      "est_in_tokens": 9,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": {
+        "rule": "short_factoid",
+        "evidence": "single wh-question, ~9 est tokens"
+      },
+      "tier": "mid"
+    },
+    {
+      "id": "trivial_05",
+      "bucket": "trivial_factoid",
+      "expected_tier": "cheap_ok",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[5,9,11,13] model=gpt-5.5 provider=openai",
+      "latency_ms": 9.2,
+      "est_in_tokens": 9,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": {
+        "rule": "short_factoid",
+        "evidence": "single wh-question, ~9 est tokens"
+      },
+      "tier": "frontier"
+    },
+    {
+      "id": "trivial_06",
+      "bucket": "trivial_factoid",
+      "expected_tier": "cheap_ok",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[8,12,13,14] model=gpt-5.5 provider=openai",
+      "latency_ms": 10.84,
+      "est_in_tokens": 13,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": {
+        "rule": "short_factoid",
+        "evidence": "single wh-question, ~13 est tokens"
+      },
+      "tier": "frontier"
+    },
+    {
+      "id": "trivial_07",
+      "bucket": "trivial_factoid",
+      "expected_tier": "cheap_ok",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[4,9,12,15] model=gpt-5.5 provider=openai",
+      "latency_ms": 9.46,
+      "est_in_tokens": 15,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": {
+        "rule": "short_factoid",
+        "evidence": "single wh-question, ~15 est tokens"
+      },
+      "tier": "frontier"
+    },
+    {
+      "id": "trivial_08",
+      "bucket": "trivial_factoid",
+      "expected_tier": "cheap_ok",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "claude-opus-4-8",
+      "provider": "anthropic",
+      "reason": "cluster:v0.65 top_p=[0,5,10,13] model=claude-opus-4-8 provider=anthropic",
+      "latency_ms": 8.48,
+      "est_in_tokens": 5,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": {
+        "rule": "short_factoid",
+        "evidence": "single wh-question, ~5 est tokens"
+      },
+      "tier": "frontier"
+    },
+    {
+      "id": "trivial_09",
+      "bucket": "trivial_factoid",
+      "expected_tier": "cheap_ok",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gemini-3.1-pro-preview",
+      "provider": "google",
+      "reason": "cluster:v0.65 top_p=[4,5,11,13] model=gemini-3.1-pro-preview provider=google",
+      "latency_ms": 8.71,
+      "est_in_tokens": 7,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": {
+        "rule": "short_factoid",
+        "evidence": "single wh-question, ~7 est tokens"
+      },
+      "tier": "frontier"
+    },
+    {
+      "id": "trivial_10",
+      "bucket": "trivial_factoid",
+      "expected_tier": "cheap_ok",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[5,8,13,14] model=gpt-5.5 provider=openai",
+      "latency_ms": 9.63,
+      "est_in_tokens": 8,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": {
+        "rule": "short_factoid",
+        "evidence": "single wh-question, ~8 est tokens"
+      },
+      "tier": "frontier"
+    },
+    {
+      "id": "format_01",
+      "bucket": "formatting_sql",
+      "expected_tier": "cheap_ok",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "claude-haiku-4-5",
+      "provider": "anthropic",
+      "reason": "cluster:v0.65 top_p=[1,3,6,7] model=claude-haiku-4-5 provider=anthropic",
+      "latency_ms": 16.0,
+      "est_in_tokens": 20,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": null,
+      "tier": "budget"
+    },
+    {
+      "id": "format_02",
+      "bucket": "formatting_sql",
+      "expected_tier": "cheap_ok",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "claude-opus-4-8",
+      "provider": "anthropic",
+      "reason": "cluster:v0.65 top_p=[5,10,13,15] model=claude-opus-4-8 provider=anthropic",
+      "latency_ms": 23.36,
+      "est_in_tokens": 42,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "format_03",
+      "bucket": "formatting_sql",
+      "expected_tier": "cheap_ok",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "claude-haiku-4-5",
+      "provider": "anthropic",
+      "reason": "cluster:v0.65 top_p=[7,12,14,15] model=claude-haiku-4-5 provider=anthropic",
+      "latency_ms": 22.7,
+      "est_in_tokens": 46,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": null,
+      "tier": "budget"
+    },
+    {
+      "id": "format_04",
+      "bucket": "formatting_sql",
+      "expected_tier": "cheap_ok",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "claude-haiku-4-5",
+      "provider": "anthropic",
+      "reason": "cluster:v0.65 top_p=[1,6,7,13] model=claude-haiku-4-5 provider=anthropic",
+      "latency_ms": 21.38,
+      "est_in_tokens": 31,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": null,
+      "tier": "budget"
+    },
+    {
+      "id": "format_05",
+      "bucket": "formatting_sql",
+      "expected_tier": "cheap_ok",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[5,6,8,13] model=gpt-5.5 provider=openai",
+      "latency_ms": 31.8,
+      "est_in_tokens": 55,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "format_06",
+      "bucket": "formatting_sql",
+      "expected_tier": "cheap_ok",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "claude-haiku-4-5",
+      "provider": "anthropic",
+      "reason": "cluster:v0.65 top_p=[1,3,6,7] model=claude-haiku-4-5 provider=anthropic",
+      "latency_ms": 19.23,
+      "est_in_tokens": 23,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": null,
+      "tier": "budget"
+    },
+    {
+      "id": "format_07",
+      "bucket": "formatting_sql",
+      "expected_tier": "cheap_ok",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "claude-haiku-4-5",
+      "provider": "anthropic",
+      "reason": "cluster:v0.65 top_p=[1,6,7,13] model=claude-haiku-4-5 provider=anthropic",
+      "latency_ms": 25.19,
+      "est_in_tokens": 37,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": null,
+      "tier": "budget"
+    },
+    {
+      "id": "format_08",
+      "bucket": "formatting_sql",
+      "expected_tier": "cheap_ok",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "claude-haiku-4-5",
+      "provider": "anthropic",
+      "reason": "cluster:v0.65 top_p=[0,6,7,13] model=claude-haiku-4-5 provider=anthropic",
+      "latency_ms": 25.08,
+      "est_in_tokens": 47,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": null,
+      "tier": "budget"
+    },
+    {
+      "id": "format_09",
+      "bucket": "formatting_sql",
+      "expected_tier": "either",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "claude-opus-4-8",
+      "provider": "anthropic",
+      "reason": "cluster:v0.65 top_p=[4,8,11,13] model=claude-opus-4-8 provider=anthropic",
+      "latency_ms": 27.02,
+      "est_in_tokens": 42,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "format_10",
+      "bucket": "formatting_sql",
+      "expected_tier": "cheap_ok",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[8,12,14,15] model=gpt-5.5 provider=openai",
+      "latency_ms": 28.63,
+      "est_in_tokens": 52,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "codegen_01",
+      "bucket": "single_file_codegen",
+      "expected_tier": "either",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "claude-opus-4-8",
+      "provider": "anthropic",
+      "reason": "cluster:v0.65 top_p=[5,8,10,12] model=claude-opus-4-8 provider=anthropic",
+      "latency_ms": 19.41,
+      "est_in_tokens": 41,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "codegen_02",
+      "bucket": "single_file_codegen",
+      "expected_tier": "either",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[0,1,3,5] model=gpt-5.5 provider=openai",
+      "latency_ms": 20.66,
+      "est_in_tokens": 51,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "codegen_03",
+      "bucket": "single_file_codegen",
+      "expected_tier": "either",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[2,3,9,15] model=gpt-5.5 provider=openai",
+      "latency_ms": 19.91,
+      "est_in_tokens": 46,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "codegen_04",
+      "bucket": "single_file_codegen",
+      "expected_tier": "either",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "claude-opus-4-8",
+      "provider": "anthropic",
+      "reason": "cluster:v0.65 top_p=[0,5,6,10] model=claude-opus-4-8 provider=anthropic",
+      "latency_ms": 27.51,
+      "est_in_tokens": 52,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "codegen_05",
+      "bucket": "single_file_codegen",
+      "expected_tier": "either",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[1,6,8,12] model=gpt-5.5 provider=openai",
+      "latency_ms": 32.05,
+      "est_in_tokens": 50,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "codegen_06",
+      "bucket": "single_file_codegen",
+      "expected_tier": "either",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[0,5,8,13] model=gpt-5.5 provider=openai",
+      "latency_ms": 22.81,
+      "est_in_tokens": 47,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "codegen_07",
+      "bucket": "single_file_codegen",
+      "expected_tier": "either",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[0,5,8,13] model=gpt-5.5 provider=openai",
+      "latency_ms": 20.31,
+      "est_in_tokens": 37,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "codegen_08",
+      "bucket": "single_file_codegen",
+      "expected_tier": "either",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "deepseek/deepseek-v4-pro",
+      "provider": "fireworks",
+      "reason": "cluster:v0.65 top_p=[3,5,6,7] model=deepseek/deepseek-v4-pro provider=fireworks",
+      "latency_ms": 20.06,
+      "est_in_tokens": 45,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": null,
+      "tier": "mid"
+    },
+    {
+      "id": "codegen_09",
+      "bucket": "single_file_codegen",
+      "expected_tier": "either",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[0,5,8,13] model=gpt-5.5 provider=openai",
+      "latency_ms": 30.93,
+      "est_in_tokens": 51,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "codegen_10",
+      "bucket": "single_file_codegen",
+      "expected_tier": "either",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "claude-haiku-4-5",
+      "provider": "anthropic",
+      "reason": "cluster:v0.65 top_p=[1,3,6,7] model=claude-haiku-4-5 provider=anthropic",
+      "latency_ms": 26.03,
+      "est_in_tokens": 46,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": null,
+      "tier": "budget"
+    },
+    {
+      "id": "refactor_01",
+      "bucket": "repo_refactor",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[0,1,5,13] model=gpt-5.5 provider=openai",
+      "latency_ms": 111.63,
+      "est_in_tokens": 182,
+      "est_out_tokens": 1024,
+      "flags": [
+        {
+          "rule": "bloom_higher_order",
+          "evidence": "matched 'Refactor'"
+        },
+        {
+          "rule": "repo_scope",
+          "evidence": "matched 'across files'"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "refactor_02",
+      "bucket": "repo_refactor",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[0,5,8,13] model=gpt-5.5 provider=openai",
+      "latency_ms": 30.59,
+      "est_in_tokens": 76,
+      "est_out_tokens": 1024,
+      "flags": [
+        {
+          "rule": "repo_scope",
+          "evidence": "matched 'monorepo'"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "refactor_03",
+      "bucket": "repo_refactor",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[5,8,13,14] model=gpt-5.5 provider=openai",
+      "latency_ms": 84.01,
+      "est_in_tokens": 158,
+      "est_out_tokens": 1024,
+      "flags": [
+        {
+          "rule": "repo_scope",
+          "evidence": "unified diff headers present"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "refactor_04",
+      "bucket": "repo_refactor",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[5,8,12,13] model=gpt-5.5 provider=openai",
+      "latency_ms": 41.16,
+      "est_in_tokens": 82,
+      "est_out_tokens": 1024,
+      "flags": [
+        {
+          "rule": "bloom_higher_order",
+          "evidence": "matched 'Restructure'"
+        },
+        {
+          "rule": "repo_scope",
+          "evidence": "5 distinct file paths referenced"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "refactor_05",
+      "bucket": "repo_refactor",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[0,5,12,13] model=gpt-5.5 provider=openai",
+      "latency_ms": 90.02,
+      "est_in_tokens": 141,
+      "est_out_tokens": 1024,
+      "flags": [
+        {
+          "rule": "rigor_intent",
+          "evidence": "matched 'audit'"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "refactor_06",
+      "bucket": "repo_refactor",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "claude-haiku-4-5",
+      "provider": "anthropic",
+      "reason": "cluster:v0.65 top_p=[0,6,7,12] model=claude-haiku-4-5 provider=anthropic",
+      "latency_ms": 34.24,
+      "est_in_tokens": 76,
+      "est_out_tokens": 1024,
+      "flags": [
+        {
+          "rule": "bloom_higher_order",
+          "evidence": "matched 'extract'"
+        }
+      ],
+      "easy": null,
+      "tier": "budget"
+    },
+    {
+      "id": "refactor_07",
+      "bucket": "repo_refactor",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "claude-haiku-4-5",
+      "provider": "anthropic",
+      "reason": "cluster:v0.65 top_p=[0,1,6,13] model=claude-haiku-4-5 provider=anthropic",
+      "latency_ms": 33.36,
+      "est_in_tokens": 78,
+      "est_out_tokens": 1024,
+      "flags": [
+        {
+          "rule": "repo_scope",
+          "evidence": "matched '12 files'"
+        }
+      ],
+      "easy": null,
+      "tier": "budget"
+    },
+    {
+      "id": "refactor_08",
+      "bucket": "repo_refactor",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[0,5,13,14] model=gpt-5.5 provider=openai",
+      "latency_ms": 65.89,
+      "est_in_tokens": 110,
+      "est_out_tokens": 1024,
+      "flags": [
+        {
+          "rule": "repo_scope",
+          "evidence": "3 distinct file paths referenced"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "refactor_09",
+      "bucket": "repo_refactor",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[0,1,5,13] model=gpt-5.5 provider=openai",
+      "latency_ms": 33.73,
+      "est_in_tokens": 69,
+      "est_out_tokens": 1024,
+      "flags": [],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "refactor_10",
+      "bucket": "repo_refactor",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[0,5,12,13] model=gpt-5.5 provider=openai",
+      "latency_ms": 69.64,
+      "est_in_tokens": 128,
+      "est_out_tokens": 1024,
+      "flags": [
+        {
+          "rule": "repo_scope",
+          "evidence": "matched 'across the codebase'"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "agentic_01",
+      "bucket": "agentic_tool_loop",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[8,12,13,14] model=gpt-5.5 provider=openai",
+      "latency_ms": 18.43,
+      "est_in_tokens": 210,
+      "est_out_tokens": 4096,
+      "flags": [
+        {
+          "rule": "tool_schema",
+          "evidence": "2 tool(s) in request: run_tests, run_command"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "agentic_02",
+      "bucket": "agentic_tool_loop",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[0,1,3,6] model=gpt-5.5 provider=openai",
+      "latency_ms": 23.98,
+      "est_in_tokens": 238,
+      "est_out_tokens": 4096,
+      "flags": [
+        {
+          "rule": "tool_schema",
+          "evidence": "3 tool(s) in request: read_file, grep, write_file"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "agentic_03",
+      "bucket": "agentic_tool_loop",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[0,5,8,13] model=gpt-5.5 provider=openai",
+      "latency_ms": 17.56,
+      "est_in_tokens": 283,
+      "est_out_tokens": 4096,
+      "flags": [
+        {
+          "rule": "tool_schema",
+          "evidence": "3 tool(s) in request: read_file, grep, write_file"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "agentic_04",
+      "bucket": "agentic_tool_loop",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[0,5,8,13] model=gpt-5.5 provider=openai",
+      "latency_ms": 17.28,
+      "est_in_tokens": 227,
+      "est_out_tokens": 4096,
+      "flags": [
+        {
+          "rule": "tool_schema",
+          "evidence": "2 tool(s) in request: run_tests, run_command"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "agentic_05",
+      "bucket": "agentic_tool_loop",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "xiaomi/mimo-v2.5-pro",
+      "provider": "deepinfra",
+      "reason": "cluster:v0.65 top_p=[0,3,5,13] model=xiaomi/mimo-v2.5-pro provider=deepinfra",
+      "latency_ms": 30.71,
+      "est_in_tokens": 169,
+      "est_out_tokens": 4096,
+      "flags": [
+        {
+          "rule": "tool_schema",
+          "evidence": "2 tool(s) in request: list_tables, run_sql"
+        },
+        {
+          "rule": "rigor_intent",
+          "evidence": "matched 'zero-downtime'"
+        }
+      ],
+      "easy": null,
+      "tier": "mid"
+    },
+    {
+      "id": "agentic_06",
+      "bucket": "agentic_tool_loop",
+      "expected_tier": "either",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "xiaomi/mimo-v2.5-pro",
+      "provider": "deepinfra",
+      "reason": "cluster:v0.65 top_p=[0,5,7,13] model=xiaomi/mimo-v2.5-pro provider=deepinfra",
+      "latency_ms": 33.09,
+      "est_in_tokens": 265,
+      "est_out_tokens": 4096,
+      "flags": [
+        {
+          "rule": "tool_schema",
+          "evidence": "3 tool(s) in request: read_file, grep, write_file"
+        }
+      ],
+      "easy": null,
+      "tier": "mid"
+    },
+    {
+      "id": "agentic_07",
+      "bucket": "agentic_tool_loop",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[0,5,8,13] model=gpt-5.5 provider=openai",
+      "latency_ms": 16.2,
+      "est_in_tokens": 360,
+      "est_out_tokens": 4096,
+      "flags": [
+        {
+          "rule": "tool_schema",
+          "evidence": "4 tool(s) in request: search_logs, read_file, grep, write_file"
+        },
+        {
+          "rule": "nondet_debug",
+          "evidence": "matched 'intermittent'"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "agentic_08",
+      "bucket": "agentic_tool_loop",
+      "expected_tier": "either",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "claude-opus-4-8",
+      "provider": "anthropic",
+      "reason": "cluster:v0.65 top_p=[0,5,8,10] model=claude-opus-4-8 provider=anthropic",
+      "latency_ms": 18.56,
+      "est_in_tokens": 217,
+      "est_out_tokens": 2048,
+      "flags": [
+        {
+          "rule": "tool_schema",
+          "evidence": "3 tool(s) in request: read_file, grep, write_file"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "agentic_09",
+      "bucket": "agentic_tool_loop",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[0,5,8,13] model=gpt-5.5 provider=openai",
+      "latency_ms": 13.46,
+      "est_in_tokens": 231,
+      "est_out_tokens": 4096,
+      "flags": [
+        {
+          "rule": "tool_schema",
+          "evidence": "2 tool(s) in request: run_tests, run_command"
+        },
+        {
+          "rule": "rigor_intent",
+          "evidence": "matched 'audit'"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "agentic_10",
+      "bucket": "agentic_tool_loop",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[0,5,8,12] model=gpt-5.5 provider=openai",
+      "latency_ms": 20.94,
+      "est_in_tokens": 214,
+      "est_out_tokens": 4096,
+      "flags": [
+        {
+          "rule": "tool_schema",
+          "evidence": "2 tool(s) in request: run_tests, run_command"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "hard_01",
+      "bucket": "hard_reasoning_debug",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "claude-opus-4-8",
+      "provider": "anthropic",
+      "reason": "cluster:v0.65 top_p=[0,8,10,12] model=claude-opus-4-8 provider=anthropic",
+      "latency_ms": 33.48,
+      "est_in_tokens": 68,
+      "est_out_tokens": 1024,
+      "flags": [
+        {
+          "rule": "math_proof",
+          "evidence": "matched 'Prove'"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "hard_02",
+      "bucket": "hard_reasoning_debug",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[0,5,8,13] model=gpt-5.5 provider=openai",
+      "latency_ms": 85.66,
+      "est_in_tokens": 139,
+      "est_out_tokens": 1024,
+      "flags": [
+        {
+          "rule": "nondet_debug",
+          "evidence": "matched 'only in production'"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "hard_03",
+      "bucket": "hard_reasoning_debug",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gemini-3.1-pro-preview",
+      "provider": "google",
+      "reason": "cluster:v0.65 top_p=[9,10,12,13] model=gemini-3.1-pro-preview provider=google",
+      "latency_ms": 44.53,
+      "est_in_tokens": 88,
+      "est_out_tokens": 1024,
+      "flags": [
+        {
+          "rule": "math_proof",
+          "evidence": "matched 'prove'"
+        },
+        {
+          "rule": "nondet_debug",
+          "evidence": "matched 'deadlock'"
+        },
+        {
+          "rule": "rigor_intent",
+          "evidence": "matched 'real money'"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "hard_04",
+      "bucket": "hard_reasoning_debug",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "gpt-5.5",
+      "provider": "openai",
+      "reason": "cluster:v0.65 top_p=[0,5,8,13] model=gpt-5.5 provider=openai",
+      "latency_ms": 54.76,
+      "est_in_tokens": 112,
+      "est_out_tokens": 1024,
+      "flags": [
+        {
+          "rule": "nondet_debug",
+          "evidence": "matched 'intermittently'"
+        },
+        {
+          "rule": "rigor_intent",
+          "evidence": "matched 'audit'"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "hard_05",
+      "bucket": "hard_reasoning_debug",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "claude-opus-4-8",
+      "provider": "anthropic",
+      "reason": "cluster:v0.65 top_p=[0,6,10,12] model=claude-opus-4-8 provider=anthropic",
+      "latency_ms": 41.25,
+      "est_in_tokens": 77,
+      "est_out_tokens": 1024,
+      "flags": [
+        {
+          "rule": "bloom_higher_order",
+          "evidence": "matched 'Derive'"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "hard_06",
+      "bucket": "hard_reasoning_debug",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "claude-opus-4-8",
+      "provider": "anthropic",
+      "reason": "cluster:v0.65 top_p=[4,8,10,11] model=claude-opus-4-8 provider=anthropic",
+      "latency_ms": 51.49,
+      "est_in_tokens": 74,
+      "est_out_tokens": 1024,
+      "flags": [
+        {
+          "rule": "math_proof",
+          "evidence": "matched 'invariant'"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "hard_07",
+      "bucket": "hard_reasoning_debug",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "claude-opus-4-8",
+      "provider": "anthropic",
+      "reason": "cluster:v0.65 top_p=[0,8,10,13] model=claude-opus-4-8 provider=anthropic",
+      "latency_ms": 56.54,
+      "est_in_tokens": 89,
+      "est_out_tokens": 1024,
+      "flags": [
+        {
+          "rule": "nondet_debug",
+          "evidence": "matched 'TOCTOU'"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "hard_08",
+      "bucket": "hard_reasoning_debug",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "claude-opus-4-8",
+      "provider": "anthropic",
+      "reason": "cluster:v0.65 top_p=[4,8,10,12] model=claude-opus-4-8 provider=anthropic",
+      "latency_ms": 70.53,
+      "est_in_tokens": 134,
+      "est_out_tokens": 1024,
+      "flags": [
+        {
+          "rule": "math_proof",
+          "evidence": "matched 'prove'"
+        },
+        {
+          "rule": "nondet_debug",
+          "evidence": "matched 'intermittently'"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "hard_09",
+      "bucket": "hard_reasoning_debug",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "claude-opus-4-8",
+      "provider": "anthropic",
+      "reason": "cluster:v0.65 top_p=[2,4,9,11] model=claude-opus-4-8 provider=anthropic",
+      "latency_ms": 43.16,
+      "est_in_tokens": 99,
+      "est_out_tokens": 1024,
+      "flags": [
+        {
+          "rule": "bloom_higher_order",
+          "evidence": "matched 'design'"
+        },
+        {
+          "rule": "rigor_intent",
+          "evidence": "matched 'Must be correct'"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    },
+    {
+      "id": "hard_10",
+      "bucket": "hard_reasoning_debug",
+      "expected_tier": "frontier_expected",
+      "requested_model": "claude-sonnet-4-6",
+      "chosen_model": "claude-opus-4-8",
+      "provider": "anthropic",
+      "reason": "cluster:v0.65 top_p=[5,8,10,13] model=claude-opus-4-8 provider=anthropic",
+      "latency_ms": 60.69,
+      "est_in_tokens": 116,
+      "est_out_tokens": 1024,
+      "flags": [
+        {
+          "rule": "nondet_debug",
+          "evidence": "matched 'occasionally'"
+        }
+      ],
+      "easy": null,
+      "tier": "frontier"
+    }
+  ],
+  "probe": [
+    {
+      "id": "trivial_01",
+      "models": [
+        "gpt-5.5",
+        "gpt-5.5",
+        "gpt-5.5"
+      ],
+      "stable": true
+    },
+    {
+      "id": "format_03",
+      "models": [
+        "claude-haiku-4-5",
+        "claude-haiku-4-5",
+        "claude-haiku-4-5"
+      ],
+      "stable": true
+    },
+    {
+      "id": "codegen_05",
+      "models": [
+        "gpt-5.5",
+        "gpt-5.5",
+        "gpt-5.5"
+      ],
+      "stable": true
+    },
+    {
+      "id": "refactor_07",
+      "models": [
+        "claude-haiku-4-5",
+        "claude-haiku-4-5",
+        "claude-haiku-4-5"
+      ],
+      "stable": true
+    },
+    {
+      "id": "agentic_09",
+      "models": [
+        "gpt-5.5",
+        "gpt-5.5",
+        "gpt-5.5"
+      ],
+      "stable": true
+    }
+  ]
+}
